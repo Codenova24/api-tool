@@ -23,7 +23,7 @@ The API Tool is a web application built with Flask that allows users to send HTT
 1. **Clone the Repository**
 
    bash
-   git clone https://github.com/yourusername/api-tool.git
+   git clone https://github.com/Codenova24/api-tool.git
    cd api-tool
 2. **Create and Activate a Virtual Environment**
 
