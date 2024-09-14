@@ -1,42 +1,70 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, session
 import requests
-import json
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')
+app.secret_key = 'your_secret_key'  # Secret key for session
+
+# Initialize request history in the session if not already present
+def initialize_history():
+    if 'request_history' not in session:
+        session['request_history'] = []
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    response = None
+    response_data = None
     error = None
-    
+
     if request.method == 'POST':
         url = request.form.get('url')
         method = request.form.get('method')
-        headers_str = request.form.get('headers')
-        data_str = request.form.get('data')
+        headers = request.form.get('headers')
+        data = request.form.get('data')
 
-        # Convert headers from JSON string to dictionary
+        # Process headers and data
         try:
-            headers = json.loads(headers_str) if headers_str else {}
-        except json.JSONDecodeError:
-            error = 'Invalid headers format. Ensure it is valid JSON.'
+            headers_dict = eval(headers) if headers else {}
+            data_dict = eval(data) if data else {}
+        except Exception as e:
+            error = "Invalid JSON format in headers or data."
+            return render_template('index.html', response_data=None, error=error)
 
-        # Convert data based on the method
-        data = data_str if data_str else None
+        # Make the API request
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=headers_dict)
+            elif method == 'POST':
+                response = requests.post(url, headers=headers_dict, json=data_dict)
+            elif method == 'PUT':
+                response = requests.put(url, headers=headers_dict, json=data_dict)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=headers_dict)
+            else:
+                error = "Unsupported HTTP method."
+                return render_template('index.html', response_data=None, error=error)
 
-        if not error:
-            try:
-                response = requests.request(method, url, headers=headers, data=data)
-            except requests.RequestException as e:
-                error = str(e)
+            # Store the request and response in the session history
+            initialize_history()
+            session['request_history'].append({
+                'url': url,
+                'method': method,
+                'headers': headers,
+                'data': data,
+                'status_code': response.status_code,
+                'response_headers': dict(response.headers),
+                'response_body': response.text
+            })
 
-    return render_template('index.html', response=response, error=error)
+            response_data = response
+        except Exception as e:
+            error = f"Error making the request: {e}"
+
+    # Render the index with the response and history
+    return render_template('index.html', response_data=response_data, error=error, history=session.get('request_history'))
+
+@app.route('/clear_history', methods=['POST'])
+def clear_history():
+    session.pop('request_history', None)  # Clear the history
+    return jsonify({'message': 'History cleared successfully.'})
 
 if __name__ == '__main__':
     app.run(debug=True)
