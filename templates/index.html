@@ -3,55 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Tool</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        pre {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            white-space: pre-wrap; /* Preserve formatting */
-        }
-        .response {
-            margin-top: 20px;
-        }
-    </style>
+    <title>API Request Tool</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to external stylesheet -->
 </head>
 <body>
     <div class="container">
-        <h1>API Request Tool</h1>
-        <form method="post">
-            <label for="url">URL:</label>
-            <input type="text" id="url" name="url" required><br><br>
-            
-            <label for="method">Method:</label>
-            <select id="method" name="method" required>
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="DELETE">DELETE</option>
-            </select><br><br>
-            
-            <label for="headers">Headers (JSON format):</label><br>
-            <textarea id="headers" name="headers" rows="4" cols="50"></textarea><br><br>
-            
-            <label for="data">Data (optional):</label><br>
-            <textarea id="data" name="data" rows="4" cols="50"></textarea><br><br>
-            
-            <input type="submit" value="Send Request">
-        </form>
+        <header>
+            <h1>API Request Tool</h1>
+        </header>
 
-        <div class="response">
+        <main>
+            <form method="post" class="api-form">
+                <div class="form-group">
+                    <label for="url">URL:</label>
+                    <input type="text" id="url" name="url" placeholder="Enter API URL" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="method">Method:</label>
+                    <select id="method" name="method" required>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="headers">Headers (JSON format):</label>
+                    <textarea id="headers" name="headers" rows="4" placeholder='{"Content-Type": "application/json"}'></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data">Data (optional):</label>
+                    <textarea id="data" name="data" rows="4" placeholder='{"key": "value"}'></textarea>
+                </div>
+                
+                <button type="submit" class="submit-button">Send Request</button>
+            </form>
+        </main>
+
+        <section class="response">
             {% if response_data %}
                 <h2>Response</h2>
                 <p><strong>Status Code:</strong> {{ response_data.status_code }}</p>
@@ -63,7 +55,7 @@
                 <h2>Error</h2>
                 <p>{{ error }}</p>
             {% endif %}
-        </div>
+        </section>
     </div>
 </body>
 </html>
